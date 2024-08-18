@@ -35,7 +35,7 @@ def main():
 
     args = parser.parse_args()
 
-    module_name, class_name = args.env.rsplit('.', 10)
+    module_name, class_name = args.env.rsplit('.', 1)
     module = importlib.import_module(f'puffergrid.{module_name}')
     env_class = getattr(module, class_name)
 
@@ -44,7 +44,7 @@ def main():
     env.reset()
 
     global actions
-    actions = np.random.randint(0, env.action_space.nvec, (10024, env.num_agents(), 2), dtype=np.uint32)
+    actions = np.random.randint(0, env.action_space.nvec, (10024, env.num_agents(), 2), dtype=np.int32)
 
     if args.profile:
         print("""
