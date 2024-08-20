@@ -1,4 +1,5 @@
 from setuptools import setup, Extension, find_packages
+from setuptools.command.build_ext import build_ext as _build_ext
 from Cython.Build import cythonize
 import numpy
 import os
@@ -35,6 +36,11 @@ os.makedirs(build_dir, exist_ok=True)
 os.makedirs("puffergrid/tests", exist_ok=True)
 os.makedirs("puffergrid/examples", exist_ok=True)
 
+class CustomBuildExtCommand(_build_ext):
+    def run(self):
+        self.run_command('build_ext')
+        super().run()
+
 setup(
     name='puffergrid',
     packages=find_packages(),
@@ -60,8 +66,7 @@ setup(
         },
         annotate=debug or annotate,
     ),
-    description='',
-    url='https://github.com/daveey/puffergrid',
+    url='https://github.com/Metta-AI/puffergrid',
     install_requires=[
         'numpy',
         'cython==3.0.11',
