@@ -30,6 +30,7 @@ class Grid {
         }
 
         inline ~Grid() {
+            printf("Grid destructor called\n");
             for (unsigned long id = 1; id < objects.size(); ++id) {
                 if (objects[id] != nullptr) {
                     delete objects[id];

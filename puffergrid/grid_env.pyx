@@ -52,13 +52,6 @@ cdef class GridEnv:
             np.zeros(max_agents, dtype=np.float32)
         )
 
-    def __dealloc__(self):
-        if self._grid != NULL:
-            print("Deallocating grid")
-            del self._grid
-            self._grid = NULL
-            print("Done deallocating grid")
-
     cdef void add_agent(self, GridObject* agent):
         self._agents.push_back(agent)
 
