@@ -54,6 +54,7 @@ class Grid {
 
         inline void remove_object(GridObject * obj) {
             this->grid[obj->location.r][obj->location.c][obj->location.layer] = 0;
+            delete obj;
             this->objects[obj->id] = nullptr;
         }
 
