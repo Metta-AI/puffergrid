@@ -30,13 +30,13 @@ class Grid {
         }
 
         inline ~Grid() {
-            printf("Grid destructor called\n");
-            for (unsigned long id = 1; id < objects.size(); ++id) {
-                if (objects[id] != nullptr) {
-                    delete objects[id];
-                    objects[id] = nullptr;
-                }
-            }
+            printf("Grid destructor called: grid %p num_objects %lu\n", this, objects.size());
+            // for (unsigned long id = 1; id < objects.size(); ++id) {
+            //     if (objects[id] != nullptr) {
+            //         printf("Deleting object %lu (%p)\n", id, objects[id]);
+            //         objects[id] = nullptr;
+            //     }
+            // }
         }
 
         inline char add_object(GridObject * obj) {
@@ -55,7 +55,7 @@ class Grid {
 
         inline void remove_object(GridObject * obj) {
             this->grid[obj->location.r][obj->location.c][obj->location.layer] = 0;
-            delete obj;
+            // delete obj;
             this->objects[obj->id] = nullptr;
         }
 
