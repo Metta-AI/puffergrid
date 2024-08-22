@@ -53,8 +53,11 @@ cdef class GridEnv:
         )
 
     def __dealloc__(self):
-        del self._grid
-        self._grid = NULL
+        if self._grid != NULL:
+            print("Deallocating grid")
+            del self._grid
+            self._grid = NULL
+            print("Done deallocating grid")
 
     cdef void add_agent(self, GridObject* agent):
         self._agents.push_back(agent)
