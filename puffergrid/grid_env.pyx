@@ -52,6 +52,10 @@ cdef class GridEnv:
             np.zeros(max_agents, dtype=np.float32)
         )
 
+    def __dealloc__(self):
+        if self._grid != NULL:
+            del self._grid
+
     cdef void add_agent(self, GridObject* agent):
         self._agents.push_back(agent)
 
