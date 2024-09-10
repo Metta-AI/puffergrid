@@ -1,13 +1,6 @@
-from pdb import set_trace as T
 from types import SimpleNamespace
-import numpy as np
 
-import pettingzoo
-import gymnasium as gym
 
-from env.griddly.builder import action
-from env.mettagrid import raylib_client
-import pufferlib
 from pufferlib.environment import PufferEnv
 
 class PufferGridEnv(PufferEnv):

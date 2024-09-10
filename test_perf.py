@@ -1,10 +1,11 @@
 import argparse
 import importlib
-import time
-import numpy as np
-from cProfile import run
 import pstats
+import time
+from cProfile import run
 from pstats import SortKey
+
+import numpy as np
 from tqdm import tqdm
 
 global actions
