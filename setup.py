@@ -21,9 +21,6 @@ ext_modules = [
     build_ext(["puffergrid/observation_encoder.pyx"]),
     build_ext(["puffergrid/stats_tracker.pyx"]),
     build_ext(["examples/forage.pyx"], "puffergrid.examples"),
-
-    build_ext(["tests/test_grid_object.pyx"], "puffergrid.tests"),
-    build_ext(["tests/test_action_handler.pyx"], "puffergrid.tests"),
 ]
 
 debug = os.getenv('DEBUG', '0') == '1'

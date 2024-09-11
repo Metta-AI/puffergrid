@@ -63,7 +63,7 @@ class PufferGridEnv(PufferEnv):
 
     @property
     def player_count(self):
-        return self._num_agents
+        return self._c_env.num_agents()
 
     @property
     def grid_features(self):
