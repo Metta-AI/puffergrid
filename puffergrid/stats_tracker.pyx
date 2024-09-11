@@ -39,10 +39,10 @@ cdef class StatsTracker:
         # sure to return 0s for any missing stats otherwise
         # pufferlib won't average correctly.
         return {
-            "game_stats": {
+            "game": {
                 k: v for k, v in self._game_stats
             },
-            "agent_stats": [{
+            "agent": [{
                     k: a.get(k, 0) for k in agent_stat_names
                 } for a in new_agent_stats
             ]
