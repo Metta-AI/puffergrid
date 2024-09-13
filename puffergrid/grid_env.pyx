@@ -113,6 +113,8 @@ cdef class GridEnv:
 
         for idx in range(self._agents.size()):
             action = actions[idx][0]
+            if action >= len(self._action_handlers):
+                continue
             arg = actions[idx][1]
             agent = self._agents[idx]
             handler = <ActionHandler>self._action_handlers[action]
@@ -230,7 +232,6 @@ cdef class GridEnv:
             obj = self._grid.object(obj_id)
             grid[obj.location.r, obj.location.c] = obj._type_id + 1
         return grid
-
 
     @property
     def action_space(self):
