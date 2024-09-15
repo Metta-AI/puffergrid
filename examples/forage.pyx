@@ -107,7 +107,7 @@ cdef class Move(ActionHandler):
     cdef unsigned char max_arg(self):
         return 1
 
-    cdef char handle_action(
+    cdef bint handle_action(
         self,
         unsigned int actor_id,
         GridObjectId actor_object_id,
@@ -121,14 +121,14 @@ cdef class Move(ActionHandler):
         cdef GridLocation new_loc = self.env._grid.relative_location(old_loc, orientation)
         if not self.env._grid.is_empty(new_loc.r, new_loc.c):
             return False
-        cdef char s = self.env._grid.move_object(actor_object_id, new_loc)
+        cdef bint s = self.env._grid.move_object(actor_object_id, new_loc)
         if s:
             self.env._stats.agent_incr(actor_id, "action.move")
 
         return s
 
 cdef class Rotate(ActionHandler):
-    cdef char handle_action(
+    cdef bint handle_action(
         self,
         unsigned int actor_id,
         GridObjectId actor_object_id,
@@ -144,7 +144,7 @@ cdef class Rotate(ActionHandler):
         return True
 
 cdef class Eat(ActionHandler):
-    cdef char handle_action(
+    cdef bint handle_action(
         self,
         unsigned int actor_id,
         GridObjectId actor_object_id,

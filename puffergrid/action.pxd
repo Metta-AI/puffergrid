@@ -7,7 +7,7 @@ cdef class ActionHandler:
 
     cdef void init(self, GridEnv env)
 
-    cdef char handle_action(
+    cdef bint handle_action(
         self,
         unsigned int actor_id,
         GridObjectId actor_object_id,

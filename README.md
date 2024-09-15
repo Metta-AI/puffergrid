@@ -76,15 +76,15 @@ Next, we'll define the actions our agents can take: Move, Rotate, and Eat.
 from puffergrid.action cimport ActionHandler, ActionArg
 
 cdef class Move(ActionHandler):
-    cdef char handle_action(self, unsigned int actor_id, GridObjectId actor_object_id, ActionArg arg):
+    cdef bint handle_action(self, unsigned int actor_id, GridObjectId actor_object_id, ActionArg arg):
         # Implementation details...
 
 cdef class Rotate(ActionHandler):
-    cdef char handle_action(self, unsigned int actor_id, GridObjectId actor_object_id, ActionArg arg):
+    cdef bint handle_action(self, unsigned int actor_id, GridObjectId actor_object_id, ActionArg arg):
         # Implementation details...
 
 cdef class Eat(ActionHandler):
-    cdef char handle_action(self, unsigned int actor_id, GridObjectId actor_object_id, ActionArg arg):
+    cdef bint handle_action(self, unsigned int actor_id, GridObjectId actor_object_id, ActionArg arg):
         # Implementation details...
 ```
 
