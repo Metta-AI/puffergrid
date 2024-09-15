@@ -14,3 +14,5 @@ cdef class ActionHandler:
         ActionArg arg):
         return False
 
+    cdef unsigned char max_arg(self):
+        return 0

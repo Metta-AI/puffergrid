@@ -13,3 +13,4 @@ cdef class ActionHandler:
         GridObjectId actor_object_id,
         ActionArg arg)
 
+    cdef unsigned char max_arg(self)

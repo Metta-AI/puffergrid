@@ -23,6 +23,9 @@ cdef class GridEnv:
         unsigned int _max_timestep
 
         list[ActionHandler] _action_handlers
+        vector[unsigned char] _max_action_args
+        unsigned char _max_action_arg
+
         ObservationEncoder _obs_encoder
 
         unsigned short _obs_width

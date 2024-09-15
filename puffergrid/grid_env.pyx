@@ -36,8 +36,12 @@ cdef class GridEnv:
         self._obs_encoder = observation_encoder
 
         self._action_handlers = action_handlers
-        for handler in action_handlers:
-            (<ActionHandler>handler).init(self)
+        self._max_action_arg = 0
+        self._max_action_args.resize(len(action_handlers))
+        for i, handler in enumerate(action_handlers):
+            handler.init(self)
+            self._max_action_args[i] = handler.max_arg()
+            self._max_action_arg = max(self._max_action_arg, handler.max_arg())
 
         self._event_manager = EventManager(self, event_handlers)
         self._stats = StatsTracker(max_agents)
@@ -118,6 +122,8 @@ cdef class GridEnv:
             arg = actions[idx][1]
             agent = self._agents[idx]
             handler = <ActionHandler>self._action_handlers[action]
+            if arg > self._max_action_args[action]:
+                continue
             handler.handle_action(idx, agent.id, arg)
         self._compute_observations()
 
@@ -235,7 +241,7 @@ cdef class GridEnv:
 
     @property
     def action_space(self):
-        return gym.spaces.MultiDiscrete((self.num_actions(), 255), dtype=np.uint32)
+        return gym.spaces.MultiDiscrete((self.num_actions(), self._max_action_arg), dtype=np.uint32)
 
     @property
     def observation_space(self):

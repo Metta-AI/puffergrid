@@ -104,6 +104,9 @@ cdef class ObsEncoder(ObservationEncoder):
 ################################################
 
 cdef class Move(ActionHandler):
+    cdef unsigned char max_arg(self):
+        return 1
+
     cdef char handle_action(
         self,
         unsigned int actor_id,
@@ -111,8 +114,6 @@ cdef class Move(ActionHandler):
         ActionArg arg):
 
         cdef unsigned short direction = arg
-        if direction >= 2:
-            return False
 
         cdef Agent* agent = <Agent*>self.env._grid.object(actor_object_id)
         cdef Orientation orientation = <Orientation>((agent.orientation + 2*(direction)) % 4)
