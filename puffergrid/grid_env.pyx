@@ -39,9 +39,9 @@ cdef class GridEnv:
         self._max_action_arg = 0
         self._max_action_args.resize(len(action_handlers))
         for i, handler in enumerate(action_handlers):
-            handler.init(self)
-            self._max_action_args[i] = handler.max_arg()
-            self._max_action_arg = max(self._max_action_arg, handler.max_arg())
+            (<ActionHandler>handler).init(self)
+            self._max_action_args[i] = (<ActionHandler>handler).max_arg()
+            self._max_action_arg = max(self._max_action_arg, self._max_action_args[i])
 
         self._event_manager = EventManager(self, event_handlers)
         self._stats = StatsTracker(max_agents)
