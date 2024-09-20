@@ -171,8 +171,8 @@ cdef class GridEnv:
     cpdef grid(self):
         return []
 
-    cpdef unsigned int num_actions(self):
-        return len(self._action_handlers)
+    cpdef list[str] action_names(self):
+        return [handler.action_name() for handler in self._action_handlers]
 
     cpdef unsigned int current_timestep(self):
         return self._current_timestep
@@ -241,7 +241,7 @@ cdef class GridEnv:
 
     @property
     def action_space(self):
-        return gym.spaces.MultiDiscrete((self.num_actions(), self._max_action_arg), dtype=np.uint32)
+        return gym.spaces.MultiDiscrete((len(self.action_names()), self._max_action_arg), dtype=np.uint32)
 
     @property
     def observation_space(self):

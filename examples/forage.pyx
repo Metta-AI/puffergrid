@@ -104,6 +104,9 @@ cdef class ObsEncoder(ObservationEncoder):
 ################################################
 
 cdef class Move(ActionHandler):
+    def __init__(self):
+        ActionHandler.__init__(self, "move")
+
     cdef unsigned char max_arg(self):
         return 1
 
@@ -128,6 +131,9 @@ cdef class Move(ActionHandler):
         return s
 
 cdef class Rotate(ActionHandler):
+    def __init__(self):
+        ActionHandler.__init__(self, "rotate")
+
     cdef bint handle_action(
         self,
         unsigned int actor_id,
@@ -144,6 +150,9 @@ cdef class Rotate(ActionHandler):
         return True
 
 cdef class Eat(ActionHandler):
+    def __init__(self):
+        ActionHandler.__init__(self, "eat")
+
     cdef bint handle_action(
         self,
         unsigned int actor_id,

@@ -78,7 +78,7 @@ cdef class GridEnv:
     cpdef unsigned int map_width(self)
     cpdef unsigned int map_height(self)
     cpdef list[str] grid_features(self)
-    cpdef unsigned int num_actions(self)
+    cpdef list[str] action_names(self)
     cpdef unsigned int num_agents(self)
     cpdef tuple observation_shape(self)
 

@@ -3,6 +3,8 @@ from puffergrid.grid_env cimport GridEnv
 from puffergrid.action cimport ActionArg
 
 cdef class ActionHandler:
+    def __init__(self, string action_name):
+        self._action_name = action_name
 
     cdef void init(self, GridEnv env):
         self.env = env
@@ -16,3 +18,6 @@ cdef class ActionHandler:
 
     cdef unsigned char max_arg(self):
         return 0
+
+    cpdef string action_name(self):
+        return self._action_name
