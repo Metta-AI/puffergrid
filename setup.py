@@ -3,6 +3,8 @@ from setuptools.command.build_ext import build_ext as _build_ext
 from Cython.Build import cythonize
 import numpy
 import os
+import multiprocessing
+import sys
 
 def build_ext(srcs, package="puffergrid"):
     return Extension(
@@ -38,12 +40,15 @@ class CustomBuildExtCommand(_build_ext):
         self.run_command('build_ext')
         super().run()
 
+num_threads = multiprocessing.cpu_count() if sys.platform == 'linux' else None
+
 setup(
     name='puffergrid',
     packages=find_packages(),
     ext_modules=cythonize(
         ext_modules,
         build_dir=build_dir,
+        nthreads=num_threads,
         compiler_directives={
             "profile": True,
             "language_level": "3",
@@ -59,7 +64,6 @@ setup(
             "linetrace": debug,
             "c_string_encoding": "utf-8",
             "c_string_type": "str",
-
         },
         annotate=debug or annotate,
     ),
