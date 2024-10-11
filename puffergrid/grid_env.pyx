@@ -143,6 +143,9 @@ cdef class GridEnv:
         self._terminals[:] = 0
         self._truncations[:] = 0
         self._episode_rewards[:] = 0
+        self._observations[:, :, :, :] = 0
+        self._rewards[:] = 0
+
         self._compute_observations()
         return (self._observations_np, {})
 
