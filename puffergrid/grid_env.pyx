@@ -165,9 +165,7 @@ cdef class GridEnv:
 
     cpdef tuple[cnp.ndarray, cnp.ndarray, cnp.ndarray, cnp.ndarray, dict] step(self, cnp.ndarray actions):
         actions = self._unflatten_actions(actions)
-        print("actions", actions)
         self._step(actions)
-        print("stepped")
         return (self._observations_np, self._rewards_np, self._terminals_np, self._truncations_np, {})
 
     cpdef void set_buffers(
