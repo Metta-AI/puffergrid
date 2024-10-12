@@ -25,23 +25,28 @@ cdef class GridEnv:
             unsigned short obs_height,
             ObservationEncoder observation_encoder,
             list[ActionHandler] action_handlers,
-            list[EventHandler] event_handlers
+            list[EventHandler] event_handlers,
+            bint use_flat_actions=False
         ):
         self._obs_width = obs_width
         self._obs_height = obs_height
         self._max_timestep = max_timestep
         self._current_timestep = 0
-
         self._grid = new Grid(map_width, map_height, layer_for_type_id)
         self._obs_encoder = observation_encoder
 
+        self._use_flat_actions = use_flat_actions
         self._action_handlers = action_handlers
         self._max_action_arg = 0
         self._max_action_args.resize(len(action_handlers))
         for i, handler in enumerate(action_handlers):
             (<ActionHandler>handler).init(self)
-            self._max_action_args[i] = (<ActionHandler>handler).max_arg()
-            self._max_action_arg = max(self._max_action_arg, self._max_action_args[i])
+            max_arg = (<ActionHandler>handler).max_arg()
+            self._max_action_args[i] = max_arg
+            self._max_action_arg = max(self._max_action_arg, max_arg)
+            if use_flat_actions:
+                for arg in range(max_arg+1):
+                    self._flat_actions.push_back(Action(i, arg))
 
         self._event_manager = EventManager(self, event_handlers)
         self._stats = StatsTracker(max_agents)
@@ -133,6 +138,15 @@ cdef class GridEnv:
         if self._max_timestep > 0 and self._current_timestep >= self._max_timestep:
             self._truncations[:] = 1
 
+    cdef cnp.ndarray _unflatten_actions(self, cnp.ndarray actions):
+        if self._use_flat_actions:
+            new_actions = np.zeros((len(actions), 2), dtype=np.int32)
+            for idx, action in enumerate(actions):
+                new_actions[idx][0] = self._flat_actions[action].action
+                new_actions[idx][1] = self._flat_actions[action].arg
+            return new_actions
+        return actions
+
     ###############################
     # Python API
     ###############################
@@ -149,8 +163,11 @@ cdef class GridEnv:
         self._compute_observations()
         return (self._observations_np, {})
 
-    cpdef tuple[cnp.ndarray, cnp.ndarray, cnp.ndarray, cnp.ndarray, dict] step(self, int[:,:] actions):
+    cpdef tuple[cnp.ndarray, cnp.ndarray, cnp.ndarray, cnp.ndarray, dict] step(self, cnp.ndarray actions):
+        actions = self._unflatten_actions(actions)
+        print("actions", actions)
         self._step(actions)
+        print("stepped")
         return (self._observations_np, self._rewards_np, self._terminals_np, self._truncations_np, {})
 
     cpdef void set_buffers(
@@ -242,8 +259,14 @@ cdef class GridEnv:
             grid[obj.location.r, obj.location.c] = obj._type_id + 1
         return grid
 
+    cpdef cnp.ndarray unflatten_actions(self, cnp.ndarray actions):
+        return self._unflatten_actions(actions)
+
     @property
     def action_space(self):
+        if self._use_flat_actions:
+            return gym.spaces.Discrete(len(self._flat_actions))
+
         return gym.spaces.MultiDiscrete((len(self.action_names()), self._max_action_arg), dtype=np.uint32)
 
     @property
@@ -257,4 +280,12 @@ cdef class GridEnv:
             dtype=obs_np_type
         )
 
+    cpdef cnp.ndarray flatten_actions(self, cnp.ndarray actions):
+        if not self._use_flat_actions:
+            return actions
 
+        new_actions = []
+        flat_actions_dict = { (action["action"], action["arg"]): idx for idx, action in enumerate(self._flat_actions) }
+        for action in actions:
+            new_actions.append(flat_actions_dict[(action[0], action[1])])
+        return np.array(new_actions, dtype=np.uint32)

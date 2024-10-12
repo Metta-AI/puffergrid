@@ -3,6 +3,10 @@ from puffergrid.grid_env cimport GridEnv
 from libcpp.string cimport string
 
 ctypedef unsigned int ActionArg
+ctypedef struct Action:
+    unsigned int action
+    unsigned int arg
+
 cdef class ActionHandler:
     cdef GridEnv env
     cdef string _action_name

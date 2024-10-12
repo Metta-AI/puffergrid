@@ -3,7 +3,7 @@ import numpy as np
 
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-from puffergrid.action cimport ActionHandler
+from puffergrid.action cimport ActionHandler, Action
 from puffergrid.event cimport EventManager
 from puffergrid.stats_tracker cimport StatsTracker
 from puffergrid.grid_object cimport GridObjectId, GridObject
@@ -25,6 +25,9 @@ cdef class GridEnv:
         list[ActionHandler] _action_handlers
         vector[unsigned char] _max_action_args
         unsigned char _max_action_arg
+
+        bint _use_flat_actions
+        vector[Action] _flat_actions
 
         ObservationEncoder _obs_encoder
 
@@ -61,6 +64,8 @@ cdef class GridEnv:
         unsigned short obs_height,
         ObsType[:,:,:] observation)
 
+    cdef cnp.ndarray _unflatten_actions(self, cnp.ndarray actions)
+
     ############################################
     # Python API
     ############################################
@@ -83,7 +88,7 @@ cdef class GridEnv:
     cpdef tuple observation_shape(self)
 
     cpdef tuple[cnp.ndarray, dict] reset(self)
-    cpdef tuple[cnp.ndarray, cnp.ndarray, cnp.ndarray, cnp.ndarray, dict] step(self, int[:,:] actions)
+    cpdef tuple[cnp.ndarray, cnp.ndarray, cnp.ndarray, cnp.ndarray, dict] step(self, cnp.ndarray actions)
 
     cpdef observe(
         self,
@@ -106,3 +111,5 @@ cdef class GridEnv:
     cpdef tuple get_buffers(self)
     cpdef cnp.ndarray render_ascii(self, list[char] type_to_char)
     cpdef cnp.ndarray grid_objects_types(self)
+    cpdef cnp.ndarray unflatten_actions(self, cnp.ndarray actions)
+    cpdef cnp.ndarray flatten_actions(self, cnp.ndarray actions)
