@@ -34,6 +34,7 @@ cdef class GridEnv:
         self._current_timestep = 0
         self._grid = new Grid(map_width, map_height, layer_for_type_id)
         self._obs_encoder = observation_encoder
+        self._obs_encoder.init(self._obs_width, self._obs_height)
 
         self._use_flat_actions = use_flat_actions
         self._action_handlers = action_handlers
@@ -269,14 +270,7 @@ cdef class GridEnv:
 
     @property
     def observation_space(self):
-        type_info = np.iinfo(obs_np_type)
-        return gym.spaces.Box(
-            low=type_info.min, high=type_info.max,
-            shape=(
-                len(self._obs_encoder.feature_names()),
-                self._obs_height, self._obs_width),
-            dtype=obs_np_type
-        )
+        return self._obs_encoder.observation_space()
 
     cpdef cnp.ndarray flatten_actions(self, cnp.ndarray actions):
         if not self._use_flat_actions:
