@@ -133,11 +133,11 @@ class Grid {
             switch (orientation) {
                 case Up:
                     new_r = loc.r - distance;
-                    new_c = loc.c + offset;
+                    new_c = loc.c - offset;
                     break;
                 case Down:
                     new_r = loc.r + distance;
-                    new_c = loc.c - offset;
+                    new_c = loc.c + offset;
                     break;
                 case Left:
                     new_r = loc.r + offset;
