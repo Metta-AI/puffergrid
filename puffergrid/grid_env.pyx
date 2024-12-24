@@ -10,7 +10,7 @@ from puffergrid.event cimport EventManager, EventHandler
 from puffergrid.grid cimport Grid
 from libcpp.vector cimport vector
 from puffergrid.stats_tracker cimport StatsTracker
-import gymnasium as gym
+import gym
 
 obs_np_type = np.uint8
 cdef class GridEnv:
