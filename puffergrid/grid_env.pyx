@@ -54,7 +54,6 @@ cdef class GridEnv:
         self._event_manager = EventManager(self, event_handlers)
         self._stats = StatsTracker(max_agents)
 
-        print("track_last_action", track_last_action)
         self._track_last_action = track_last_action
 
         self.set_buffers(
@@ -223,7 +222,6 @@ cdef class GridEnv:
         return self._grid.height
 
     cpdef list[str] grid_features(self):
-        print("in grid_features track_last_action", self._track_last_action)
         cdef list[str] features = self._obs_encoder.feature_names()
         if self._track_last_action:
             features.append("last_action")
