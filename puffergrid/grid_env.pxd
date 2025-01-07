@@ -51,6 +51,8 @@ cdef class GridEnv:
 
         list[string] _grid_features
 
+        bint _track_last_action
+
     cdef void add_agent(self, GridObject* agent)
 
     cdef void _compute_observations(self, int[:,:] actions)

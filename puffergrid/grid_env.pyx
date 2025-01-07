@@ -12,6 +12,8 @@ from libcpp.vector cimport vector
 from puffergrid.stats_tracker cimport StatsTracker
 import gymnasium as gym
 
+obs_np_type = np.uint8
+
 cdef class GridEnv:
     def __init__(
             self,
@@ -25,7 +27,8 @@ cdef class GridEnv:
             ObservationEncoder observation_encoder,
             list[ActionHandler] action_handlers,
             list[EventHandler] event_handlers,
-            bint use_flat_actions=False
+            bint use_flat_actions=False,
+            bint track_last_action=False
         ):
         self._obs_width = obs_width
         self._obs_height = obs_height
@@ -51,15 +54,18 @@ cdef class GridEnv:
         self._event_manager = EventManager(self, event_handlers)
         self._stats = StatsTracker(max_agents)
 
+        print("track_last_action", track_last_action)
+        self._track_last_action = track_last_action
+
         self.set_buffers(
             np.zeros(
                 (
                     max_agents,
-                    len(self._obs_encoder.feature_names()),
+                    len(self.grid_features()),
                     self._obs_height,
                     self._obs_width
                 ),
-                dtype=np.uint8),
+                dtype=obs_np_type),
             np.zeros(max_agents, dtype=np.int8),
             np.zeros(max_agents, dtype=np.int8),
             np.zeros(max_agents, dtype=np.float32)
@@ -114,7 +120,7 @@ cdef class GridEnv:
                 self._observations[idx]
             )
 
-        if self._obs_encoder.track_last_action:
+        if self._track_last_action:
             middle_x = self._obs_width // 2
             middle_y = self._obs_height // 2
             for idx in range(self._agents.size()):
@@ -217,13 +223,18 @@ cdef class GridEnv:
         return self._grid.height
 
     cpdef list[str] grid_features(self):
-        return self._obs_encoder.feature_names()
+        print("in grid_features track_last_action", self._track_last_action)
+        cdef list[str] features = self._obs_encoder.feature_names()
+        if self._track_last_action:
+            features.append("last_action")
+            features.append("last_action_argument")
+        return features
 
     cpdef unsigned int num_agents(self):
         return self._agents.size()
 
     cpdef tuple observation_shape(self):
-        return (len(self._obs_encoder.feature_names()), self.obs_height, self.obs_width)
+        return (len(self.grid_features()), self.obs_height, self.obs_width)
 
     cpdef observe(
         self,
@@ -284,7 +295,13 @@ cdef class GridEnv:
 
     @property
     def observation_space(self):
-        return self._obs_encoder.observation_space()
+        space = self._obs_encoder.observation_space()
+        return gym.spaces.Box(
+            0,
+            255,
+            shape=(len(self.grid_features()), self._obs_height, self._obs_width),
+            dtype=obs_np_type
+        )
 
     cpdef cnp.ndarray flatten_actions(self, cnp.ndarray actions):
         if not self._use_flat_actions:
