@@ -11,6 +11,7 @@ cdef class ObservationEncoder:
     cdef:
         unsigned int _obs_width
         unsigned int _obs_height
+        bint last_action_tracker
 
     cdef init(self, unsigned int obs_width, unsigned int obs_height)
     cdef encode(self, const GridObject *obj, ObsType[:] obs)

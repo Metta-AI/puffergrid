@@ -12,7 +12,6 @@ from libcpp.vector cimport vector
 from puffergrid.stats_tracker cimport StatsTracker
 import gymnasium as gym
 
-obs_np_type = np.uint8
 cdef class GridEnv:
     def __init__(
             self,
@@ -54,9 +53,13 @@ cdef class GridEnv:
 
         self.set_buffers(
             np.zeros(
-                (max_agents, len(self._obs_encoder.feature_names()),
-                self._obs_height, self._obs_width),
-                dtype=obs_np_type),
+                (
+                    max_agents,
+                    len(self._obs_encoder.feature_names()),
+                    self._obs_height,
+                    self._obs_width
+                ),
+                dtype=np.uint8),
             np.zeros(max_agents, dtype=np.int8),
             np.zeros(max_agents, dtype=np.int8),
             np.zeros(max_agents, dtype=np.float32)
@@ -99,13 +102,24 @@ cdef class GridEnv:
                     agent_ob = observation[:, obs_r, obs_c]
                     self._obs_encoder.encode(obj, agent_ob)
 
-    cdef void _compute_observations(self):
+    cdef void _compute_observations(self, int[:,:] actions):
         cdef GridObject *agent
         for idx in range(self._agents.size()):
             agent = self._agents[idx]
             self._compute_observation(
-                agent.location.r, agent.location.c,
-                self._obs_width, self._obs_height, self._observations[idx])
+                agent.location.r,
+                agent.location.c,
+                self._obs_width,
+                self._obs_height,
+                self._observations[idx]
+            )
+
+        if self._obs_encoder.last_action_tracker:
+            middle_x = self._obs_width // 2
+            middle_y = self._obs_height // 2
+            for idx in range(self._agents.size()):
+                self._observations_np[idx][24][middle_y][middle_x] = actions[idx][0]
+                self._observations_np[idx][25][middle_y][middle_x] = actions[idx][1]
 
     cdef void _step(self, int[:,:] actions):
         cdef:
@@ -131,7 +145,7 @@ cdef class GridEnv:
             if arg > self._max_action_args[action]:
                 continue
             handler.handle_action(idx, agent.id, arg)
-        self._compute_observations()
+        self._compute_observations(actions)
 
         for i in range(self._episode_rewards.shape[0]):
             self._episode_rewards[i] += self._rewards[i]
@@ -161,7 +175,7 @@ cdef class GridEnv:
         self._observations[:, :, :, :] = 0
         self._rewards[:] = 0
 
-        self._compute_observations()
+        self._compute_observations(np.zeros((self._agents.size(), 2), dtype=np.int32))
         return (self._observations_np, {})
 
     cpdef tuple[cnp.ndarray, cnp.ndarray, cnp.ndarray, cnp.ndarray, dict] step(self, cnp.ndarray actions):

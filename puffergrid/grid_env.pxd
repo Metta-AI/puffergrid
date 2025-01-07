@@ -53,7 +53,7 @@ cdef class GridEnv:
 
     cdef void add_agent(self, GridObject* agent)
 
-    cdef void _compute_observations(self)
+    cdef void _compute_observations(self, int[:,:] actions)
     cdef void _step(self, int[:,:] actions)
 
     cdef void _compute_observation(
