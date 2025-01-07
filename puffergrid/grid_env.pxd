@@ -33,6 +33,8 @@ cdef class GridEnv:
 
         unsigned short _obs_width
         unsigned short _obs_height
+        unsigned short _middle_x
+        unsigned short _middle_y
 
         vector[GridObject*] _agents
 
@@ -51,9 +53,11 @@ cdef class GridEnv:
 
         list[string] _grid_features
 
+        bint _track_last_action
+
     cdef void add_agent(self, GridObject* agent)
 
-    cdef void _compute_observations(self)
+    cdef void _compute_observations(self, int[:,:] actions)
     cdef void _step(self, int[:,:] actions)
 
     cdef void _compute_observation(

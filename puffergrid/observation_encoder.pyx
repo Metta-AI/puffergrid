@@ -30,4 +30,3 @@ cdef class ObservationEncoder:
                         self._obs_height, self._obs_width),
             dtype=self.obs_np_type()
         )
-

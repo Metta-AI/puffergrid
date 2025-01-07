@@ -13,6 +13,7 @@ from puffergrid.stats_tracker cimport StatsTracker
 import gymnasium as gym
 
 obs_np_type = np.uint8
+
 cdef class GridEnv:
     def __init__(
             self,
@@ -26,10 +27,13 @@ cdef class GridEnv:
             ObservationEncoder observation_encoder,
             list[ActionHandler] action_handlers,
             list[EventHandler] event_handlers,
-            bint use_flat_actions=False
+            bint use_flat_actions=False,
+            bint track_last_action=False
         ):
         self._obs_width = obs_width
         self._obs_height = obs_height
+        self._middle_x = obs_width // 2
+        self._middle_y = obs_height // 2
         self._max_timestep = max_timestep
         self._current_timestep = 0
         self._grid = new Grid(map_width, map_height, layer_for_type_id)
@@ -52,10 +56,16 @@ cdef class GridEnv:
         self._event_manager = EventManager(self, event_handlers)
         self._stats = StatsTracker(max_agents)
 
+        self._track_last_action = track_last_action
+
         self.set_buffers(
             np.zeros(
-                (max_agents, len(self._obs_encoder.feature_names()),
-                self._obs_height, self._obs_width),
+                (
+                    max_agents,
+                    len(self.grid_features()),
+                    self._obs_height,
+                    self._obs_width
+                ),
                 dtype=obs_np_type),
             np.zeros(max_agents, dtype=np.int8),
             np.zeros(max_agents, dtype=np.int8),
@@ -99,13 +109,22 @@ cdef class GridEnv:
                     agent_ob = observation[:, obs_r, obs_c]
                     self._obs_encoder.encode(obj, agent_ob)
 
-    cdef void _compute_observations(self):
+    cdef void _compute_observations(self, int[:,:] actions):
         cdef GridObject *agent
         for idx in range(self._agents.size()):
             agent = self._agents[idx]
             self._compute_observation(
-                agent.location.r, agent.location.c,
-                self._obs_width, self._obs_height, self._observations[idx])
+                agent.location.r,
+                agent.location.c,
+                self._obs_width,
+                self._obs_height,
+                self._observations[idx]
+            )
+
+        if self._track_last_action:
+            for idx in range(self._agents.size()):
+                self._observations[idx][24][self._middle_y][self._middle_x] = actions[idx][0]
+                self._observations[idx][25][self._middle_y][self._middle_x] = actions[idx][1]
 
     cdef void _step(self, int[:,:] actions):
         cdef:
@@ -131,7 +150,7 @@ cdef class GridEnv:
             if arg > self._max_action_args[action]:
                 continue
             handler.handle_action(idx, agent.id, arg)
-        self._compute_observations()
+        self._compute_observations(actions)
 
         for i in range(self._episode_rewards.shape[0]):
             self._episode_rewards[i] += self._rewards[i]
@@ -161,7 +180,7 @@ cdef class GridEnv:
         self._observations[:, :, :, :] = 0
         self._rewards[:] = 0
 
-        self._compute_observations()
+        self._compute_observations(np.zeros((self._agents.size(), 2), dtype=np.int32))
         return (self._observations_np, {})
 
     cpdef tuple[cnp.ndarray, cnp.ndarray, cnp.ndarray, cnp.ndarray, dict] step(self, cnp.ndarray actions):
@@ -203,13 +222,17 @@ cdef class GridEnv:
         return self._grid.height
 
     cpdef list[str] grid_features(self):
-        return self._obs_encoder.feature_names()
+        cdef list[str] features = self._obs_encoder.feature_names()
+        if self._track_last_action:
+            features.append("last_action")
+            features.append("last_action_argument")
+        return features
 
     cpdef unsigned int num_agents(self):
         return self._agents.size()
 
     cpdef tuple observation_shape(self):
-        return (len(self._obs_encoder.feature_names()), self.obs_height, self.obs_width)
+        return (len(self.grid_features()), self.obs_height, self.obs_width)
 
     cpdef observe(
         self,
@@ -270,7 +293,13 @@ cdef class GridEnv:
 
     @property
     def observation_space(self):
-        return self._obs_encoder.observation_space()
+        space = self._obs_encoder.observation_space()
+        return gym.spaces.Box(
+            0,
+            255,
+            shape=(len(self.grid_features()), self._obs_height, self._obs_width),
+            dtype=obs_np_type
+        )
 
     cpdef cnp.ndarray flatten_actions(self, cnp.ndarray actions):
         if not self._use_flat_actions:
