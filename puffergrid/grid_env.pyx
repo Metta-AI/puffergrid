@@ -118,8 +118,8 @@ cdef class GridEnv:
             middle_x = self._obs_width // 2
             middle_y = self._obs_height // 2
             for idx in range(self._agents.size()):
-                self._observations_np[idx][24][middle_y][middle_x] = actions[idx][0]
-                self._observations_np[idx][25][middle_y][middle_x] = actions[idx][1]
+                self._observations[idx][24][middle_y][middle_x] = actions[idx][0]
+                self._observations[idx][25][middle_y][middle_x] = actions[idx][1]
 
     cdef void _step(self, int[:,:] actions):
         cdef:
