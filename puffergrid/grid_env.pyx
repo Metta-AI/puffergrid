@@ -114,7 +114,7 @@ cdef class GridEnv:
                 self._observations[idx]
             )
 
-        if self._obs_encoder.last_action_tracker:
+        if self._obs_encoder.track_last_action:
             middle_x = self._obs_width // 2
             middle_y = self._obs_height // 2
             for idx in range(self._agents.size()):
