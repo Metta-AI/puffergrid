@@ -32,6 +32,8 @@ cdef class GridEnv:
         ):
         self._obs_width = obs_width
         self._obs_height = obs_height
+        self._middle_x = obs_width // 2
+        self._middle_y = obs_height // 2
         self._max_timestep = max_timestep
         self._current_timestep = 0
         self._grid = new Grid(map_width, map_height, layer_for_type_id)
@@ -120,11 +122,9 @@ cdef class GridEnv:
             )
 
         if self._track_last_action:
-            middle_x = self._obs_width // 2
-            middle_y = self._obs_height // 2
             for idx in range(self._agents.size()):
-                self._observations[idx][24][middle_y][middle_x] = actions[idx][0]
-                self._observations[idx][25][middle_y][middle_x] = actions[idx][1]
+                self._observations[idx][24][self._middle_y][self._middle_x] = actions[idx][0]
+                self._observations[idx][25][self._middle_y][self._middle_x] = actions[idx][1]
 
     cdef void _step(self, int[:,:] actions):
         cdef:
